@@ -1,19 +1,27 @@
 = savgol
 
-Description goes here.
+provides implementations of savitsky-golay filtering using (dreamware right
+now) pure ruby, narray, and scriruby's nmatrix. 
 
-== Contributing to savgol
- 
-* Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet.
-* Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it.
-* Fork the project.
-* Start a feature/bugfix branch.
-* Commit and push until you are happy with your contribution.
-* Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
-* Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
+It is based on the {scipy implementation}[http://www.scipy.org/Cookbook/SavitzkyGolay].
+
+== Examples
+
+[Everything is currently dreamware right now, still need to implement this thing]
+
+=== Array implementation
+
+    require 'savgol/array'
+
+=== NArray implementation
+
+    require 'savgol/narray'
+
+=== NMatrix implemenation
+
+    require 'savgol/nmatrix'
 
 == Copyright
 
-Copyright (c) 2012 John Prince. See LICENSE.txt for
-further details.
+MIT license.  See LICENSE.txt for more details.
 
