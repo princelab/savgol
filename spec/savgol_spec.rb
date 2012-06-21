@@ -2,10 +2,9 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe Savgol do
   it "works for simple case" do
-    x = (0..10).step(0.5).to_a
-    y = [1, 2, 3, 4, 3.5, 5, 3, 2.2, 3, 0, -1, 2, 0, -2, -5, -8, -7, -2, 0, 1, 1]
-    x.extend(Savgol)
-    x.savgol(y, 5, 3)
+    ar = [1, 2, 3, 4, 3.5, 5, 3, 2.2, 3, 0, -1, 2, 0, -2, -5, -8, -7, -2, 0, 1, 1]
+    ar.extend(Savgol)
+    ar.savgol(7, 3)
     puts "FINISHED"
 =begin
     b = 
