@@ -1,8 +1,16 @@
 require 'savgol/core'
 
 class Savgol
-  class NArray
+  class Array
     include Savgol::Core
+
+    def savgol(window_size, order, deriv=0, check_args=false)
+      sg_check_args(window_size, order) if check_args
+      half_window = (window_size -1) / 2
+      weights = sg_weights(half_window, order, deriv)
+      ar = sg_pad_ends(half_window)
+      sg_convolve(ar, weights)
+    end
 
     def sg_convolve(data, weights, mode=:valid)
       data.each_cons(weights.size).map do |ar|
@@ -28,12 +36,9 @@ class Savgol
       mat.pinv.row(deriv).to_a
     end
 
-    def savgol(window_size, order, deriv=0, check_args=false)
-      sg_check_args(window_size, order) if check_args
-      half_window = (window_size -1) / 2
-      weights = sg_weights(half_window, order, deriv)
-      ar = sg_pad_ends(half_window)
-      sg_convolve(ar, weights)
-    end
   end
+end
+
+class Array
+  include Savgol::Array
 end

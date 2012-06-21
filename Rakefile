@@ -17,6 +17,7 @@ Jeweler::Tasks.new do |gem|
   gem.add_development_dependency "rspec", "~> 2.8.0"
   gem.add_development_dependency "rdoc", "~> 3.12"
   gem.add_development_dependency "jeweler", "~> 1.8.3"
+  gem.add_development_dependency "narray", "~> 0.6.0.1"
 end
 Jeweler::RubygemsDotOrgTasks.new
 
