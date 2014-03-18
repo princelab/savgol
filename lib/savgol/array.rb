@@ -1,13 +1,9 @@
 require "matrix"
 
-require "gsl"
-
 module Savgol
-	# class Array
-	# include Savgol::Core
-
+	
 	def savgol(window_size, order, deriv=0, check_args=false)
-      
+		  
 		# check arguments
 		if !window_size.is_a?(Integer) || window_size.abs != window_size || window_size % 2 != 1 || window_size < 1
 			raise ArgumentError, "window_size size must be a positive odd integer" 
@@ -46,19 +42,14 @@ module Savgol
 	# returns an object that will convolve with the padded array
 	def sg_weights(half_window, order, deriv=0)
 		# byebug
-		mat = GSL::Matrix[ *(-half_window..half_window).map {|k| (0..order).map {|i| k**i }} ]
-		# Moore-Penrose psuedo-inverse
-		# SVD: A=UWV'
-		# A+=V(W'W)^(−1)W'U'
-		# (u, v, w) = mat.svd
-		# pinv = v * (w.trans*w).inverse * w.trans * u.trans
-		
+		mat = Matrix[ *(-half_window..half_window).map {|k| (0..order).map {|i| k**i }} ]
+		# Moore-Penrose psuedo-inverse without SVD (not so precize)
+		# A' = (A.t * A)^-1 * A.t
 		pinv_matrix = Matrix[*(mat.trans*mat).to_a].inverse * Matrix[*mat.to_a].transpose
-		pinv = GSL::Matrix[*pinv_matrix.to_a]
+		pinv = Matrix[*pinv_matrix.to_a]
 		pinv.row(deriv).to_a
 	end
 
-	# end
 end
 
 class Array

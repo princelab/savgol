@@ -13,7 +13,6 @@ Jeweler::Tasks.new do |gem|
   gem.description = "Extending Array class with method which calculates applies Savitzky-Golay filter used for smoothing the data"
   gem.email = "jtprince@gmail.com"
   gem.authors = ["John T. Prince", "Ondra Beneš"]
-  gem.add_runtime_dependency 'rb-gsl', "~> 1.16", ">= 1.16.0"
   gem.add_development_dependency "jeweler", "~> 1.8", ">= 1.8.3"
   gem.files = Dir.glob('lib/**/*.rb')
 end
