@@ -45,7 +45,7 @@ module Savgol
 		mat = Matrix[ *(-half_window..half_window).map {|k| (0..order).map {|i| k**i }} ]
 		# Moore-Penrose psuedo-inverse without SVD (not so precize)
 		# A' = (A.t * A)^-1 * A.t
-		pinv_matrix = Matrix[*(mat.trans*mat).to_a].inverse * Matrix[*mat.to_a].transpose
+		pinv_matrix = Matrix[*(mat.transpose*mat).to_a].inverse * Matrix[*mat.to_a].transpose
 		pinv = Matrix[*pinv_matrix.to_a]
 		pinv.row(deriv).to_a
 	end

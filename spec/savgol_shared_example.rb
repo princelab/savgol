@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 shared_examples "a savgol smoother" do
   let(:smoother) do 
     object = described_class[1, 2, 3, 4, -7, -2, 0, 1, 1]
