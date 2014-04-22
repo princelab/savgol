@@ -3,6 +3,31 @@ require 'matrix'
 
 module Savgol
   class << self
+    # Does simple least squares to fit a polynomial based on the given x
+    # values.  The major speed-boost of doing savgol is lost for uneven time points.
+    # TODO: implement for different derivatives; implement with a window that
+    # is of fixed size (not based on the number of points)
+    def savgol_uneven(xvals, yvals, window_points=11, order=4, check_args: false, new_xvals: nil)
+      sg_check_arguments(window_points, order) if check_args
+      
+
+      half_window = (window_points -1) / 2
+      yvals_padded = sg_pad_ends(yvals, half_window)
+      xvals_padded = sg_pad_xvals(xvals, half_window)
+
+     # if new_xvals
+      #else
+      #end
+
+      xs_iter = xvals_padded.each_cons(window_points)
+      yvals_padded.each_cons(window_points).map do |ys|
+        xdata = xs_iter.next.map { |xi| (0..order).map { |pow| (xi**pow).to_f } }
+        mx = Matrix[*xdata]
+        my = Matrix.column_vector(ys)
+        ((mx.t * mx).inv * mx.t * my).transpose.to_a[0][half_window]
+      end
+    end
+
     def savgol(array, window_points=11, order=4, deriv: 0, check_args: false)
       sg_check_arguments(window_points, order) if check_args
       half_window = (window_points -1) / 2
@@ -39,6 +64,28 @@ module Savgol
       fin.reverse!
       fin.map! {|v| array[-1] + (v - array[-1]).abs }
       start.push(*array, *fin)
+    end
+
+    # pads the ends of x vals
+    def sg_pad_xvals(array, half_window)
+      deltas = array[0..half_window].each_cons(2).map {|a,b| b-a }
+      start = array[0]
+      prevals = deltas.map do |delta| 
+        newval = start - delta
+        start = newval
+        newval
+      end
+      prevals.reverse!
+
+      deltas = array[(-half_window-1)..-1].each_cons(2).map {|a,b| b-a }
+      start = array[-1]
+      postvals = deltas.reverse.map do |delta| 
+        newval = start + delta
+        start = newval
+        newval
+      end
+
+      prevals.push(*array, *postvals)
     end
 
     # returns an object that will convolve with the padded array
