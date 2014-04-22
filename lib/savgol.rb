@@ -1,6 +1,8 @@
 require 'savgol/version'
 require 'matrix'
 
+require 'gnuplot'
+
 module Savgol
   class << self
     # Does simple least squares to fit a polynomial based on the given x
@@ -21,10 +23,13 @@ module Savgol
 
       xs_iter = xvals_padded.each_cons(window_points)
       yvals_padded.each_cons(window_points).map do |ys|
-        xdata = xs_iter.next.map { |xi| (0..order).map { |pow| (xi**pow).to_f } }
+        xs = xs_iter.next
+        xdata = xs.map { |xi| (0..order).map { |pow| (xi**pow).to_f } }
         mx = Matrix[*xdata]
         my = Matrix.column_vector(ys)
-        ((mx.t * mx).inv * mx.t * my).transpose.to_a[0][half_window]
+        coefficients = ((mx.t * mx).inv * mx.t * my).transpose.to_a[0]
+        x = xs[half_window]
+        coefficients.zip((0..order).to_a).map {|coeff, pow| coeff * (x**pow) }.reduce(:+)
       end
     end
 
