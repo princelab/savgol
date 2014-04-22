@@ -5,16 +5,9 @@ shared_examples "a savgol smoother" do
     object
   end
 
-  it 'pads with the reverse geometrically inverted sequence' do
-    expect(smoother.sg_pad_ends(2)).to eq [-1, 0, 1, 2, 3, 4, -7, -2, 0, 1, 1, 1, 2]
-    expect(smoother.sg_pad_ends(3)).to eq [-2, -1, 0, 1, 2, 3, 4, -7, -2, 0, 1, 1, 1, 2, 4]
-  end
-
   describe 'smoothing a signal' do
     let(:smoother) do
-      object = described_class[1, 2, 3, 4, 3.5, 5, 3, 2.2, 3, 0, -1, 2, 0, -2, -5, -8, -7, -2, 0, 1, 1]
-      object.extend(Savgol)
-      object
+      described_class[1, 2, 3, 4, 3.5, 5, 3, 2.2, 3, 0, -1, 2, 0, -2, -5, -8, -7, -2, 0, 1, 1]
     end
 
     it "works for the simple case" do
