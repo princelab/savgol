@@ -3,6 +3,29 @@ require 'matrix'
 
 require 'gnuplot'
 
+
+class NilEnumerator < Enumerator
+  def initialize(enum)
+    @enum = enum
+  end
+ 
+  def next
+    begin
+      @enum.next
+    rescue StopIteration
+      nil
+    end
+  end
+ 
+  #def peek
+    #begin
+      #@enum.peek
+    #rescue StopIteration
+      #nil
+    #end
+  #end
+end
+ 
 module Savgol
   class << self
     # Does simple least squares to fit a polynomial based on the given x
@@ -18,33 +41,34 @@ module Savgol
       xvals_size = xvals.size
 
       if new_xvals
-        new_yvals = []
-        i = 0
-        new_xvals.each do |xval|  
-          while i < xvals_size
-            if xval < xvals[i]
-              # we could do a min_by search, but I want to ensure consistent
-              # behavior in the event of a tie (use the lowest indexed number)
-              deltas = [i, i-1].map {|index| (xval-xvals[index]).abs }
-              i_xval_near = deltas.index(deltas.min)
-              
-              ars = [xvals_padded, yvals_padded].
-                map {|ar| ar[i_xval_near, window_points] }
-              #puts "arsfirst: #{ars.first}, last:#{ars.last}, order:#{order}, xval:#{xval}"
-              new_yvals << sg_regress_and_find(ars.first, ars.last, order, xval)
-              break
-            else
-              i += 1
-            end
-          end
-        end
-        new_yvals
+        abort 'here'
       else
         xs_iter = xvals_padded.each_cons(window_points)
         yvals_padded.each_cons(window_points).map do |ys|
           xs = xs_iter.next
           sg_regress_and_find(xs, ys, order, xs[half_window])
         end
+      end
+    end
+
+    # returns the nearest index in original_vals for each value in new_vals
+    # (assumes both are sorted arrays). complexity: O(n + m)
+    def sg_nearest_index(original_vals, new_vals)
+      newval_iter = NilEnumerator.new(new_vals.each)
+      
+      (0...original_vals.size)
+      until original_vals[i]
+
+        next if new_xval > original_vals[i]
+        if original_vals[i] == new_xval
+          nearest_index << i
+        else
+          # we could do a min_by search, but I want to ensure consistent
+          # behavior in the event of a tie (use the lowest indexed number)
+          deltas = [i, i-1].map {|index| (xval-original_vals[index]).abs }
+          deltas.index(deltas.min)
+        end
+        new_xval = newval_iter.next
       end
     end
 
@@ -130,6 +154,24 @@ module Savgol
     end
   end
 end
+
+
+#if xval == xvals[i]
+  #i
+#else
+#end
+
+                #ars = [xvals_padded, yvals_padded].
+                  #map {|ar| ar[i_xval_near, window_points] }
+                ##puts "arsfirst: #{ars.first}, last:#{ars.last}, order:#{order}, xval:#{xval}"
+                #new_yvals << sg_regress_and_find(ars.first, ars.last, order, xval)
+                #break
+              #else
+                #i += 1
+
+
+
+
 
 # ar = [1, 2, 3, 4, 3.5, 5, 3, 2.2, 3, 0, -1, 2, 0, -2, -5, -8, -7, -2, 0, 1, 1]
 # numpy_savgol_output = [1.0, 2.0, 3.12857143, 3.57142857, 4.27142857, 4.12571429, 3.36857143, 2.69714286, 2.04, 0.32571429, -0.05714286, 0.8, 0.51428571, -2.17142857, -5.25714286, -7.65714286, -6.4, -2.77142857, 0.17142857, 0.91428571, 1.0]

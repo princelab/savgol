@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'gnuplot'
+require 'csv'
 
 describe Savgol do
   describe 'padding' do
@@ -15,41 +16,55 @@ describe Savgol do
     end
   end
 
-  describe 'smoothing unevenly spaced data' do
-    xvals = %w(-1 0 2 3 4 7 8 10 11 12 13 14 17 18).map &:to_f
-    new_xvals = xvals.map {|v| v + 0.5 }
-    yvals = %w(-2 1 0 1 1 3 4 7  8  9  7  4  1   2).map {|v| v.to_f + 30 }
+  describe 'finding nearest index' do
 
-    yvals_on = Savgol.savgol_uneven(xvals, yvals, 5, 2)
+    let(:original) { [0,1,2,3,4] }
+    let(:newvals) { [-2,-1,1,2.4,2.5,4,4.5,5] }
 
-    yvals_off = Savgol.savgol_uneven(xvals, yvals, 5, 2, new_xvals: new_xvals)
-    
-    p xvals
-    p yvals
-    p yvals_on
-    p new_xvals
-    p yvals_off
-
-    Gnuplot.open do |gp|
-      Gnuplot::Plot.new(gp) do |plot|
-        plot.data << Gnuplot::DataSet.new([xvals, yvals]) do |ds|
-          ds.title = "original"
-          ds.with = "linespoints"
-        end
-
-        plot.data << Gnuplot::DataSet.new([xvals, yvals_on]) do |ds|
-          ds.title = "smoothed"
-          ds.with = "linespoints"
-        end
-
-        plot.data << Gnuplot::DataSet.new([new_xvals, yvals_off]) do |ds|
-          ds.title = "interpolated"
-          ds.with = "linespoints"
-        end
-
-      end
+    it 'efficiently finds the nearest index' do
+      expect(Savgol.sg_nearest_index(original, newvals)).to eq([0,0,1,2,2,4,4,4])
     end
-
   end
+
+#  describe 'smoothing unevenly spaced data' do
+    #xvals = %w(-1 0 2 3 4 7 8 10 11 12 13 14 17 18).map &:to_f
+    #new_xvals = xvals.map {|v| v + 0.5 }
+    #yvals = %w(-2 1 0 1 1 3 4 7  8  9  7  4  1   2).map {|v| v.to_f + 30 }
+
+    #yvals_on = Savgol.savgol_uneven(xvals, yvals, 5, 2)
+
+    #yvals_off = Savgol.savgol_uneven(xvals, yvals, 5, 2, new_xvals: new_xvals)
+    
+    #CSV.open("dog.csv", 'wb') do |csv|
+      #csv << %w(xvals yvals yvalsOn newxvals yvalsFromnewxvals)
+      #[xvals, yvals, yvals_on, new_xvals, yvals_off].transpose.each do |ar|
+        #csv << ar
+      #end
+    #end
+
+    #if false
+    #Gnuplot.open do |gp|
+      #Gnuplot::Plot.new(gp) do |plot|
+
+        #plot.data << Gnuplot::DataSet.new([new_xvals, yvals_off]) do |ds|
+          #ds.title = "interpolated"
+          #ds.with = "linespoints"
+        #end
+
+        #plot.data << Gnuplot::DataSet.new([xvals, yvals]) do |ds|
+          #ds.title = "original"
+          #ds.with = "linespoints"
+        #end
+
+        #plot.data << Gnuplot::DataSet.new([xvals, yvals_on]) do |ds|
+          #ds.title = "smoothed"
+          #ds.with = "linespoints"
+        #end
+
+      #end
+    #end
+    #end
+
+  #end
 end
 
