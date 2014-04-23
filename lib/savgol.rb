@@ -11,26 +11,51 @@ module Savgol
     # is of fixed size (not based on the number of points)
     def savgol_uneven(xvals, yvals, window_points=11, order=4, check_args: false, new_xvals: nil)
       sg_check_arguments(window_points, order) if check_args
-      
 
       half_window = (window_points -1) / 2
       yvals_padded = sg_pad_ends(yvals, half_window)
       xvals_padded = sg_pad_xvals(xvals, half_window)
+      xvals_size = xvals.size
 
-     # if new_xvals
-      #else
-      #end
-
-      xs_iter = xvals_padded.each_cons(window_points)
-      yvals_padded.each_cons(window_points).map do |ys|
-        xs = xs_iter.next
-        xdata = xs.map { |xi| (0..order).map { |pow| (xi**pow).to_f } }
-        mx = Matrix[*xdata]
-        my = Matrix.column_vector(ys)
-        coefficients = ((mx.t * mx).inv * mx.t * my).transpose.to_a[0]
-        x = xs[half_window]
-        coefficients.zip((0..order).to_a).map {|coeff, pow| coeff * (x**pow) }.reduce(:+)
+      if new_xvals
+        new_yvals = []
+        i = 0
+        new_xvals.each do |xval|  
+          while i < xvals_size
+            if xval < xvals[i]
+              # we could do a min_by search, but I want to ensure consistent
+              # behavior in the event of a tie (use the lowest indexed number)
+              deltas = [i, i-1].map {|index| (xval-xvals[index]).abs }
+              i_xval_near = deltas.index(deltas.min)
+              
+              ars = [xvals_padded, yvals_padded].
+                map {|ar| ar[i_xval_near, window_points] }
+              #puts "arsfirst: #{ars.first}, last:#{ars.last}, order:#{order}, xval:#{xval}"
+              new_yvals << sg_regress_and_find(ars.first, ars.last, order, xval)
+              break
+            else
+              i += 1
+            end
+          end
+        end
+        new_yvals
+      else
+        xs_iter = xvals_padded.each_cons(window_points)
+        yvals_padded.each_cons(window_points).map do |ys|
+          xs = xs_iter.next
+          sg_regress_and_find(xs, ys, order, xs[half_window])
+        end
       end
+    end
+
+    def sg_regress_and_find(xdata, ydata, order, xval)
+      xdata_matrix = xdata.map { |xi| (0..order).map { |pow| (xi**pow).to_f } }
+      mx = Matrix[*xdata_matrix]
+      my = Matrix.column_vector(ydata)
+      ((mx.t * mx).inv * mx.t * my).transpose.to_a[0].
+        zip((0..order).to_a).
+        map {|coeff, pow| coeff * (xval**pow) }.
+        reduce(:+)
     end
 
     def savgol(array, window_points=11, order=4, deriv: 0, check_args: false)
