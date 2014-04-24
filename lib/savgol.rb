@@ -13,20 +13,6 @@ class NilEnumerator < Enumerator
       nil
     end
   end
- 
-  def peek
-    begin
-      @enum.peek
-    rescue StopIteration
-      nil
-    end
-  end
-end
-
-module Enumerable
-  def nilstop_iterator
-    NilEnumerator.new(self.each)
-  end
 end
  
 module Savgol
@@ -44,7 +30,15 @@ module Savgol
       xvals_size = xvals.size
 
       if new_xvals
-        abort 'here'
+        nearest_xval_indices = sg_nearest_index(xvals, new_xvals)
+        new_xvals.zip(nearest_xval_indices).map do |new_xval, index|
+          sg_regress_and_find(
+            xvals_padded[index,window_points],  
+            yvals_padded[index,window_points],
+            order,
+            new_xval
+          )
+        end
       else
         xs_iter = xvals_padded.each_cons(window_points)
         yvals_padded.each_cons(window_points).map do |ys|
@@ -57,10 +51,10 @@ module Savgol
     # returns the nearest index in original_vals for each value in new_vals
     # (assumes both are sorted arrays). complexity: O(n + m)
     def sg_nearest_index(original_vals, new_vals)
-      newval_iter = new_vals.nilstop_iterator
+      newval_iter = NilEnumerator.new(new_vals.each)
       indices = []
 
-      index_iter = (0...original_vals.size).nilstop_iterator
+      index_iter = NilEnumerator.new((0...original_vals.size).each)
       index = index_iter.next
       newval=newval_iter.next
       last_index = original_vals.size-1
@@ -180,29 +174,3 @@ module Savgol
     end
   end
 end
-
-
-#if xval == xvals[i]
-  #i
-#else
-#end
-
-                #ars = [xvals_padded, yvals_padded].
-                  #map {|ar| ar[i_xval_near, window_points] }
-                ##puts "arsfirst: #{ars.first}, last:#{ars.last}, order:#{order}, xval:#{xval}"
-                #new_yvals << sg_regress_and_find(ars.first, ars.last, order, xval)
-                #break
-              #else
-                #i += 1
-
-
-
-
-
-# ar = [1, 2, 3, 4, 3.5, 5, 3, 2.2, 3, 0, -1, 2, 0, -2, -5, -8, -7, -2, 0, 1, 1]
-# numpy_savgol_output = [1.0, 2.0, 3.12857143, 3.57142857, 4.27142857, 4.12571429, 3.36857143, 2.69714286, 2.04, 0.32571429, -0.05714286, 0.8, 0.51428571, -2.17142857, -5.25714286, -7.65714286, -6.4, -2.77142857, 0.17142857, 0.91428571, 1.0]
-# sg = ar.savgol(5,3)
-# 
-# sg.zip(numpy_savgol_output) do |sgv, numpy_sgv|
-#   p "#{sgv} vs #{numpy_sgv} diff #{(sgv - numpy_sgv).abs.round(8)}"
-# end
