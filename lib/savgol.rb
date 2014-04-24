@@ -1,9 +1,6 @@
 require 'savgol/version'
 require 'matrix'
 
-require 'gnuplot'
-
-
 class NilEnumerator < Enumerator
   def initialize(enum)
     @enum = enum
@@ -17,13 +14,19 @@ class NilEnumerator < Enumerator
     end
   end
  
-  #def peek
-    #begin
-      #@enum.peek
-    #rescue StopIteration
-      #nil
-    #end
-  #end
+  def peek
+    begin
+      @enum.peek
+    rescue StopIteration
+      nil
+    end
+  end
+end
+
+module Enumerable
+  def nilstop_iterator
+    NilEnumerator.new(self.each)
+  end
 end
  
 module Savgol
@@ -54,22 +57,45 @@ module Savgol
     # returns the nearest index in original_vals for each value in new_vals
     # (assumes both are sorted arrays). complexity: O(n + m)
     def sg_nearest_index(original_vals, new_vals)
-      newval_iter = NilEnumerator.new(new_vals.each)
-      
-      (0...original_vals.size)
-      until original_vals[i]
+      newval_iter = new_vals.nilstop_iterator
+      indices = []
 
-        next if new_xval > original_vals[i]
-        if original_vals[i] == new_xval
-          nearest_index << i
-        else
-          # we could do a min_by search, but I want to ensure consistent
-          # behavior in the event of a tie (use the lowest indexed number)
-          deltas = [i, i-1].map {|index| (xval-original_vals[index]).abs }
-          deltas.index(deltas.min)
-        end
-        new_xval = newval_iter.next
+      index_iter = (0...original_vals.size).nilstop_iterator
+      index = index_iter.next
+      newval=newval_iter.next
+      last_index = original_vals.size-1
+
+      until newval >= original_vals[index]
+        indices << index
+        break unless newval = newval_iter.next
       end
+
+      loop do
+        break unless newval
+
+        if index.nil?
+          indices << last_index 
+        else
+          until newval <= original_vals[index]
+            index = index_iter.next
+            if !index
+              indices << last_index
+              break
+            end
+          end
+
+          if index
+            if newval < original_vals[index]
+              indices << ((newval - original_vals[index-1]) <= (original_vals[index] - newval) ? index-1 : index)
+            else
+              indices << index
+            end
+          end
+        end
+        newval = newval_iter.next
+      end
+
+      indices
     end
 
     def sg_regress_and_find(xdata, ydata, order, xval)

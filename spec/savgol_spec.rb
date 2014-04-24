@@ -17,11 +17,25 @@ describe Savgol do
   end
 
   describe 'finding nearest index' do
-
     let(:original) { [0,1,2,3,4] }
-    let(:newvals) { [-2,-1,1,2.4,2.5,4,4.5,5] }
+
+    it 'finds nearest index to the left' do
+      newvals = [-2, -1]
+      expect(Savgol.sg_nearest_index(original, newvals)).to eq([0,0])
+    end
+
+    it 'finds nearest indices in the middle' do
+      newvals = [1,1.4,1.5,1.6,2,2.1]
+      expect(Savgol.sg_nearest_index(original, newvals)).to eq([1,1,1,2,2,2])
+    end
+    
+    it 'finds nearest index to the right' do
+      newvals = [5,6]
+      expect(Savgol.sg_nearest_index(original, newvals)).to eq([4,4])
+    end
 
     it 'efficiently finds the nearest index' do
+      newvals = [-2,-1,1,2.4,2.5,4,4.5,5]
       expect(Savgol.sg_nearest_index(original, newvals)).to eq([0,0,1,2,2,4,4,4])
     end
   end
