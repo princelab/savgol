@@ -13,7 +13,7 @@ shared_examples "a savgol smoother" do
     it "works for the simple case" do
       numpy_savgol_output = [1.0, 2.0, 3.12857143, 3.57142857, 4.27142857, 4.12571429, 3.36857143, 2.69714286, 2.04, 0.32571429, -0.05714286, 0.8, 0.51428571, -2.17142857, -5.25714286, -7.65714286, -6.4, -2.77142857, 0.17142857, 0.91428571, 1.0]
       sg = smoother.savgol(5,3)
-      sg.size.should == numpy_savgol_output.size
+      expect(sg.size).to eq(numpy_savgol_output.size)
 
       numpy_savgol_output.each_with_index do |exp, i|
         expect(sg[i]).to be_within(0.000001).of(exp)

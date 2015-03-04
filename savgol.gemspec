@@ -25,12 +25,12 @@ Gem::Specification.new do |spec|
   end
 
   [
-    ["bundler", "~> 1.5.1"],
+    ["bundler", "~> 1.8.3"],
     ["rake"],
-    ["rspec", "~> 2.14.1"], 
-    ["rdoc", "~> 4.1.0"], 
-    ["simplecov", "~> 0.8.2"],
-    ["gnuplot"],
+    ["rspec", "~> 3.2.0"], 
+    ["rdoc", "~> 4.2.0"], 
+    ["simplecov", "~> 0.9.2"],
+    ["gnuplot", "~> 2.6.2"],
   ].each do |args|
     spec.add_development_dependency(*args)
   end
