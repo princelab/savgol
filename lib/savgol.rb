@@ -5,7 +5,7 @@ class NilEnumerator < Enumerator
   def initialize(enum)
     @enum = enum
   end
- 
+
   def next
     begin
       @enum.next
@@ -14,7 +14,7 @@ class NilEnumerator < Enumerator
     end
   end
 end
- 
+
 module Savgol
   class << self
     # Does simple least squares to fit a polynomial based on the given x
@@ -33,7 +33,7 @@ module Savgol
         nearest_xval_indices = sg_nearest_index(xvals, new_xvals)
         new_xvals.zip(nearest_xval_indices).map do |new_xval, index|
           sg_regress_and_find(
-            xvals_padded[index,window_points],  
+            xvals_padded[index,window_points],
             yvals_padded[index,window_points],
             order,
             new_xval
@@ -68,7 +68,7 @@ module Savgol
         break unless newval
 
         if index.nil?
-          indices << last_index 
+          indices << last_index
         else
           until newval <= original_vals[index]
             index = index_iter.next
@@ -112,7 +112,7 @@ module Savgol
 
     def sg_check_arguments(window_points, order)
       if !window_points.is_a?(Integer) || window_points.abs != window_points || window_points % 2 != 1 || window_points < 1
-        raise ArgumentError, "window_points size must be a positive odd integer" 
+        raise ArgumentError, "window_points size must be a positive odd integer"
       end
       if !order.is_a?(Integer) || order < 0
         raise ArgumentError, "order must be an integer >= 0"
@@ -144,7 +144,7 @@ module Savgol
     def sg_pad_xvals(array, half_window)
       deltas = array[0..half_window].each_cons(2).map {|a,b| b-a }
       start = array[0]
-      prevals = deltas.map do |delta| 
+      prevals = deltas.map do |delta|
         newval = start - delta
         start = newval
         newval
@@ -153,7 +153,7 @@ module Savgol
 
       deltas = array[(-half_window-1)..-1].each_cons(2).map {|a,b| b-a }
       start = array[-1]
-      postvals = deltas.reverse.map do |delta| 
+      postvals = deltas.reverse.map do |delta|
         newval = start + delta
         start = newval
         newval
